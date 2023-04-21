@@ -1,0 +1,5 @@
+/debug
+/target
+/pkg
+Cargo.lock
+wasm-pack.log

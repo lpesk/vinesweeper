@@ -1,6 +1,6 @@
 // A sub-region of the canvas that requests text input and draws each word to
 // the screen.
-class textRegion {
+class TextRegion {
     constructor(ctx, x, y, width, height) {
 	let fontSize = parseInt(ctx.font)
 
@@ -24,9 +24,10 @@ class textRegion {
 	// Mutable: current position and text state
 	this.x = this.xMin;
 	this.y = this.yMin;
-	this.words = []; // array of `wordBox`es
+	this.words = []; // array of `Word`s
 	this.index = 0; // index into `words` array
 	this.allowInput = true;
+	this.timeSinceUpdate = 0;
 
 	// Create the initial input element
 	this.input = this.newInput("");
@@ -58,6 +59,7 @@ class textRegion {
     }
 
     handleInputChar(e) {
+	this.timeSinceUpdate = 0;
 	let inputWidth = this.ctx.measureText(this.input.value).width;
 	// When backspacing across a word boundary, recreate the previous
 	// input element for editing.
@@ -168,7 +170,7 @@ class textRegion {
 
     storeInput() {
 	let rect = this.input.getBoundingClientRect();
-	let word = new wordBox(
+	let word = new Word(
 	    this.ctx,
 	    this.input.value,
 	    rect.x,
@@ -190,7 +192,7 @@ class textRegion {
     }
 }
 
-class wordBox {
+class Word {
     // `x` and `y` are the coordinates of the upper left corner
     // of the box containing `text`.
     //
@@ -216,4 +218,4 @@ class wordBox {
     }
 }
 
-export { textRegion, wordBox }
+export { TextRegion, Word }
