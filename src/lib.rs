@@ -1,4 +1,5 @@
 use {
+    rand::Rng,
     rapier2d::prelude::*,
     wasm_bindgen::prelude::*,
     web_sys::{CanvasRenderingContext2d, HtmlCanvasElement},
@@ -66,7 +67,7 @@ impl Universe {
             ctx: ctx,
 
             // Simulation ingredients
-            gravity: vector![0.0, 20.0].into(), // gentle downward force
+            gravity: vector![0.0, 0.0].into(), // no gravity
             physics_pipeline: PhysicsPipeline::new(),
             integration_params: IntegrationParameters::default(),
             island_manager: IslandManager::new(),
@@ -82,6 +83,7 @@ impl Universe {
     }
 
     pub fn tick(&mut self) {
+        self.add_wind();
         self.step();
         for word in self.words.iter_mut() {
             word.update_coords(&mut self.rigid_bodies);
@@ -141,6 +143,24 @@ impl Universe {
             &physics_hooks,
             &event_handler,
         );
+    }
+
+    fn add_wind(&mut self) -> RigidBodyHandle {
+        let mut rng = rand::thread_rng();
+        let body = RigidBodyBuilder::dynamic()
+            .translation(vector![120.0, rng.gen_range(50.0..150.0)])
+            .ccd_enabled(true)
+            .build();
+        let body_handle = self.rigid_bodies.insert(body);
+        let collider = ColliderBuilder::ball(20.0)
+            .density(500.0)
+            .restitution(0.0)
+            .build();
+        self.colliders
+            .insert_with_parent(collider, body_handle, &mut self.rigid_bodies);
+        let body = &mut self.rigid_bodies.get_mut(body_handle).unwrap();
+        body.add_force(vector![100.0, rng.gen_range(-10.0..100.0)], true);
+        body_handle
     }
 }
 

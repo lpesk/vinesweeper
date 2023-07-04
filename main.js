@@ -9,7 +9,7 @@ const maxFontSize = 24;
 // Wait this many ticks after the last text entry before starting the animation.
 const timeOut = 500;
 // Thickness (in px) of all solid walls in the simulation.
-const wallThickness = 10;
+const wallThickness = 20;
 // Margin between solid walls and the edge of the window.
 const wallMargin = 100;
 
@@ -75,9 +75,13 @@ function renderLoop() {
 
 	    // Add a floor just above the lower edge of the window.
 	    universe.add_wall(window.innerWidth / 2, window.innerHeight - wallMargin, window.innerWidth, wallThickness);
-	    // Add walls on the left- and right-hand sides of the window.
+	    // Add a ceiling just below the upper edge of the window.
+	    universe.add_wall(window.innerWidth / 2, wallMargin, window.innerWidth - 2 * wallMargin, wallThickness);
+	    // Add a wall on the left-hand side of the window.
 	    universe.add_wall(wallMargin, window.innerHeight / 2, wallThickness, window.innerHeight);
-	    universe.add_wall(window.innerWidth - wallMargin, window.innerHeight / 2, wallThickness, window.innerHeight);
+	    // Add walls along the upper and lower ends of the right-hand side, with a gap in between.
+	    universe.add_wall(window.innerWidth - wallMargin, window.innerHeight / 6, wallThickness, window.innerHeight / 3);
+	    universe.add_wall(window.innerWidth - wallMargin, window.innerHeight * (5/6), wallThickness, window.innerHeight / 3);
 
 	    // Pass the text to wasm.
 	    for (let i = 0; i < words.length; i++) {
