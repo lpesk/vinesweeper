@@ -149,6 +149,7 @@ struct WordBox {
     y_max: f32,
     width: f32,
     height: f32,
+    angle: f32,
     text: String,
 
     // simulation data
@@ -163,6 +164,7 @@ impl WordBox {
             y_max,
             width,
             height,
+            angle: 0.0,
             text,
 
             body_handle: RigidBodyHandle::default(),
@@ -176,7 +178,9 @@ impl WordBox {
                 self.x_min + self.width / 2.0,
                 self.y_max - self.height / 2.0
             ])
-            .lock_rotations()
+            .rotation(self.angle)
+            // lots of angular damping so that most text stays horizontal
+            .angular_damping(20.0)
             .ccd_enabled(false) // allow occasional overlap
             .build()
     }
@@ -196,13 +200,18 @@ impl WordBox {
     }
 
     fn update_coords(&mut self, bodies: &RigidBodySet) {
-        let coords = bodies[self.body_handle].translation();
+        let body = &bodies[self.body_handle];
+        let coords = body.translation();
         self.x_min = coords.x - self.width / 2.0;
         self.y_max = coords.y + self.height / 2.0;
+        self.angle = body.rotation().angle();
     }
 
     fn render(&self, ctx: &CanvasRenderingContext2d) {
-        ctx.fill_text(&self.text, self.x_min as f64, self.y_max as f64)
-            .unwrap();
+        ctx.save();
+        ctx.translate(self.x_min as f64, self.y_max as f64).unwrap();
+        ctx.rotate(self.angle as f64).unwrap();
+        ctx.fill_text(&self.text, 0.0, 0.0 as f64).unwrap();
+        ctx.restore();
     }
 }
